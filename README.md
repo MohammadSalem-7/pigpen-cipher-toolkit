@@ -30,7 +30,7 @@
 
 لا حاجة لأي تثبيت أو خادم. فقط:
 
-1. حمّل ملف [`pigpen-cipher-toolkit.html`](./pigpen-cipher-toolkit.html)
+1. حمّل ملف [`index.html`](./pigpen-cipher-toolkit.html)
 2. افتحه مباشرة في أي متصفح حديث (Chrome / Edge / Firefox / Safari)
 3. استمتع بالتطبيق كاملًا — Offline 100%
 
