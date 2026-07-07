@@ -1,6 +1,9 @@
-MIT License
+MIT License (with Mandatory Attribution Clause)
 
-Copyright (c) 2026 MohammadSalem-7
+Copyright (c) 2026 Mohammad Salem (𝔐𝔬𝔥𝔞𝔪𝔪𝔞𝔡 𝕊𝔞𝔩𝔢𝔪 𓂀)
+Official link: https://shorturl.at/zj4Hc
+
+Project: Pigpen Cipher Toolkit
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -9,13 +12,34 @@ to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
 copies of the Software, and to permit persons to whom the Software is
 furnished to do so, subject to the following conditions:
 
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
+1. The above copyright notice, this permission notice, and the "Attribution
+   Clause" below shall be included in all copies or substantial portions of
+   the Software.
+
+2. ATTRIBUTION CLAUSE (MANDATORY / إلزامي):
+
+   Any copy, fork, redistribution, or derivative work of this Software —
+   whether modified or unmodified, in source or compiled form — MUST retain,
+   visibly and without alteration, the original owner's name and link exactly
+   as follows, in any user-facing interface (footer, about screen, settings
+   screen, welcome/splash screen, or equivalent):
+
+       Name : 𝔐𝔬𝔥𝔞𝔪𝔪𝔞𝔡 𝕊𝔞𝔩𝔢𝔪 𓂀
+       Link : https://shorturl.at/zj4Hc
+
+   This name and link must not be removed, hidden, obfuscated, replaced, or
+   modified in any way, regardless of how the Software is used, rebranded,
+   or redistributed. This requirement applies to the original Software and
+   to any derivative works built upon it.
+
+   يُمنع منعًا باتًا حذف أو إخفاء أو تعديل اسم المالك الأصلي أو الرابط الخاص به
+   من أي نسخة أو نسخة معدّلة أو مشتقة من هذا البرنامج، ويجب أن يظل ظاهرًا
+   بشكل واضح داخل واجهة المستخدم في جميع الحالات.
 
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
 AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+THE SOFTWARE.

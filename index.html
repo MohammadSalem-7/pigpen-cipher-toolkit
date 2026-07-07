@@ -1,0 +1,1345 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl" id="htmlRoot">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>𓂀</text></svg>" />
+<title>Pigpen Cipher Toolkit</title>
+<style>
+
+:root{
+  --bg-0:#070912; --bg-1:#0d1120; --bg-2:#121729; --panel:rgba(20,26,46,.62);
+  --border:rgba(120,170,255,.16); --text-1:#eaf2ff; --text-2:#9fb0d0; --text-3:#66759c;
+  --accent:#00e5ff; --accent-2:#7b5cff; --danger:#ff5470; --success:#33e19a; --warn:#ffcc66;
+  --glow:0 0 18px rgba(0,229,255,.35); --radius:16px; --radius-sm:10px;
+  --font-main:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;
+  --font-mono:'Consolas','Courier New',monospace;
+}
+html[data-theme="cyberpunk"]{
+  --bg-0:#0a0014; --bg-1:#120022; --bg-2:#1a0430; --panel:rgba(30,8,50,.55);
+  --border:rgba(255,60,220,.22); --accent:#ff2ec4; --accent-2:#00e5ff; --glow:0 0 20px rgba(255,46,196,.45);
+}
+html[data-theme="hacker"]{
+  --bg-0:#020705; --bg-1:#04120a; --bg-2:#071c10; --panel:rgba(6,30,16,.6);
+  --border:rgba(51,225,154,.25); --accent:#33e19a; --accent-2:#8dffbe; --glow:0 0 18px rgba(51,225,154,.4);
+  --text-1:#d8ffe8;
+}
+html[data-theme="material"]{
+  --bg-0:#0e1013; --bg-1:#15181c; --bg-2:#1c2126; --panel:rgba(28,33,38,.65);
+  --border:rgba(130,170,255,.15); --accent:#6ea8fe; --accent-2:#b388ff; --glow:0 0 14px rgba(110,168,254,.3);
+}
+html[data-theme="amoled"]{
+  --bg-0:#000000; --bg-1:#000000; --bg-2:#080808; --panel:rgba(14,14,14,.7);
+  --border:rgba(255,255,255,.08); --accent:#ffffff; --accent-2:#8a8a8a; --glow:0 0 10px rgba(255,255,255,.15);
+}
+
+*{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
+html,body{height:100%;}
+body{
+  margin:0; font-family:var(--font-main); background:
+    radial-gradient(circle at 15% 10%, var(--bg-1), var(--bg-0) 55%),
+    radial-gradient(circle at 85% 90%, var(--bg-2), var(--bg-0) 60%);
+  color:var(--text-1); min-height:100vh; transition:background .4s ease, color .4s ease;
+  overflow-x:hidden;
+}
+html[dir="rtl"] body{font-family:'Segoe UI',Tahoma,'Arial',sans-serif;}
+
+::-webkit-scrollbar{width:8px; height:8px;}
+::-webkit-scrollbar-thumb{background:var(--accent); border-radius:8px; opacity:.5;}
+::-webkit-scrollbar-track{background:transparent;}
+
+.glass{
+  background:var(--panel); backdrop-filter:blur(14px) saturate(140%);
+  -webkit-backdrop-filter:blur(14px) saturate(140%);
+  border:1px solid var(--border); border-radius:var(--radius);
+}
+
+#app{max-width:1180px; margin:0 auto; padding:16px 16px 60px;}
+
+.app-header{
+  display:flex; align-items:center; justify-content:space-between; gap:12px;
+  padding:14px 18px; margin-bottom:16px; position:sticky; top:8px; z-index:50;
+}
+.brand{display:flex; align-items:center; gap:10px; cursor:default;}
+.brand-logo{
+  width:38px; height:38px; border-radius:10px; display:flex; align-items:center; justify-content:center;
+  background:linear-gradient(135deg,var(--accent),var(--accent-2)); box-shadow:var(--glow);
+  font-weight:900; color:#05060a; font-size:16px;
+}
+.brand-title{font-weight:800; font-size:18px; letter-spacing:.5px;}
+.brand-sub{font-size:11px; color:var(--text-3);}
+
+.header-actions{display:flex; align-items:center; gap:8px; flex-wrap:wrap;}
+.icon-btn{
+  background:rgba(255,255,255,.04); border:1px solid var(--border); color:var(--text-1);
+  border-radius:12px; padding:8px 12px; cursor:pointer; font-size:13px; font-weight:600;
+  display:flex; align-items:center; gap:6px; transition:.25s ease; position:relative; overflow:hidden;
+}
+.icon-btn:hover{ border-color:var(--accent); box-shadow:var(--glow); transform:translateY(-1px);}
+.icon-btn:active{transform:translateY(0) scale(.97);}
+
+.tabs-nav{
+  display:flex; gap:6px; padding:6px; margin-bottom:16px; overflow-x:auto; scrollbar-width:none;
+}
+.tabs-nav::-webkit-scrollbar{display:none;}
+.tab-btn{
+  flex:1 1 auto; white-space:nowrap; background:transparent; border:1px solid transparent; color:var(--text-2);
+  padding:10px 16px; border-radius:12px; cursor:pointer; font-size:13.5px; font-weight:700;
+  display:flex; align-items:center; gap:8px; justify-content:center; transition:.25s ease;
+}
+.tab-btn .ic{font-size:15px;}
+.tab-btn:hover{color:var(--text-1); background:rgba(255,255,255,.04);}
+.tab-btn.active{
+  color:var(--bg-0); background:linear-gradient(135deg,var(--accent),var(--accent-2));
+  box-shadow:var(--glow); border-color:transparent;
+}
+
+.tab-panel{display:none; animation:fadeSlide .35s ease;}
+.tab-panel.active{display:block;}
+@keyframes fadeSlide{from{opacity:0; transform:translateY(8px);} to{opacity:1; transform:translateY(0);}}
+
+.card{padding:18px; margin-bottom:16px;}
+.card h2{margin:0 0 4px; font-size:16px; display:flex; align-items:center; gap:8px;}
+.card .hint{font-size:12px; color:var(--text-3); margin-bottom:12px;}
+
+.grid-2{display:grid; grid-template-columns:1fr 1fr; gap:16px;}
+@media(max-width:760px){.grid-2{grid-template-columns:1fr;}}
+
+textarea, input[type="text"], select{
+  width:100%; background:rgba(0,0,0,.25); border:1px solid var(--border); color:var(--text-1);
+  border-radius:var(--radius-sm); padding:12px 14px; font-size:15px; font-family:var(--font-main);
+  resize:vertical; outline:none; transition:.2s ease;
+}
+textarea:focus, input[type="text"]:focus, select:focus{border-color:var(--accent); box-shadow:var(--glow);}
+textarea{min-height:110px; line-height:1.6;}
+
+.btn{
+  background:linear-gradient(135deg,var(--accent),var(--accent-2)); color:#05060a; border:none;
+  padding:10px 16px; border-radius:12px; font-weight:800; font-size:13px; cursor:pointer;
+  display:inline-flex; align-items:center; gap:6px; transition:.2s ease; position:relative; overflow:hidden;
+}
+.btn:hover{filter:brightness(1.08); box-shadow:var(--glow); transform:translateY(-1px);}
+.btn:active{transform:translateY(0) scale(.96);}
+.btn.ghost{background:rgba(255,255,255,.05); color:var(--text-1); border:1px solid var(--border);}
+.btn.danger{background:linear-gradient(135deg,var(--danger),#ff8a9b); color:#1a0006;}
+.btn.sm{padding:7px 12px; font-size:12px;}
+.btn-row{display:flex; gap:8px; flex-wrap:wrap; margin-top:12px;}
+
+.ripple{position:absolute; border-radius:50%; transform:scale(0); animation:rippleAnim .55s ease-out; background:rgba(255,255,255,.55); pointer-events:none;}
+@keyframes rippleAnim{to{transform:scale(3.2); opacity:0;}}
+
+.symbol-output{
+  display:flex; flex-wrap:wrap; gap:10px; padding:16px; min-height:90px; align-items:center;
+  background:rgba(0,0,0,.22); border:1px dashed var(--border); border-radius:var(--radius-sm);
+}
+.symbol-tile{
+  width:46px; height:46px; display:flex; align-items:center; justify-content:center; flex-shrink:0;
+  animation:popIn .25s ease;
+}
+.symbol-tile svg{width:100%; height:100%; filter:drop-shadow(0 0 4px rgba(0,229,255,.35));}
+html[data-theme="cyberpunk"] .symbol-tile svg{filter:drop-shadow(0 0 5px rgba(255,46,196,.45));}
+html[data-theme="hacker"] .symbol-tile svg{filter:drop-shadow(0 0 5px rgba(51,225,154,.45));}
+.symbol-tile.space{width:14px;}
+.symbol-tile.punct{color:var(--text-2); font-size:22px; font-family:var(--font-mono);}
+@keyframes popIn{from{opacity:0; transform:scale(.6);} to{opacity:1; transform:scale(1);}}
+
+.result-box{
+  padding:14px 16px; border-radius:var(--radius-sm); background:rgba(0,0,0,.22); border:1px solid var(--border);
+  min-height:52px; font-size:16px; line-height:1.7; word-break:break-word;
+}
+.result-box.ar{direction:rtl; text-align:right; font-size:17px;}
+.result-box .placeholder{color:var(--text-3); font-style:italic;}
+.typing::after{content:'▍'; animation:blink 1s step-start infinite; color:var(--accent);}
+@keyframes blink{50%{opacity:0;}}
+
+.palette-wrap{margin-top:10px;}
+.palette-grid{display:grid; grid-template-columns:repeat(9,1fr); gap:6px;}
+@media(max-width:700px){.palette-grid{grid-template-columns:repeat(6,1fr);}}
+.pkey{
+  aspect-ratio:1/1; display:flex; flex-direction:column; align-items:center; justify-content:center;
+  background:rgba(255,255,255,.03); border:1px solid var(--border); border-radius:10px; cursor:pointer;
+  transition:.18s ease; position:relative; overflow:hidden; padding:4px;
+}
+.pkey svg{width:60%; height:60%;}
+.pkey .letter{font-size:10px; color:var(--text-3); margin-top:2px; font-weight:700;}
+.pkey:hover{border-color:var(--accent); box-shadow:var(--glow); transform:translateY(-2px);}
+.pkey:active{transform:translateY(0) scale(.94);}
+.palette-group-label{font-size:11px; color:var(--text-3); margin:10px 0 4px; font-weight:700; letter-spacing:.5px;}
+
+.dict-list{max-height:420px; overflow-y:auto; margin-top:10px;}
+.dict-row{
+  display:flex; align-items:center; justify-content:space-between; padding:10px 12px; border-radius:10px;
+  border:1px solid var(--border); margin-bottom:6px; background:rgba(255,255,255,.02); transition:.2s ease;
+}
+.dict-row:hover{border-color:var(--accent);}
+.dict-word{font-weight:800;}
+.dict-ar{color:var(--accent); font-weight:700;}
+.dict-star{cursor:pointer; color:var(--text-3); font-size:16px; transition:.2s ease;}
+.dict-star.active{color:var(--warn); text-shadow:0 0 8px rgba(255,204,102,.6);}
+
+.practice-stage{display:flex; flex-direction:column; align-items:center; gap:18px; padding:20px;}
+.practice-symbol{width:130px; height:130px;}
+.practice-symbol svg{width:100%; height:100%; filter:drop-shadow(0 0 10px rgba(0,229,255,.4));}
+.practice-options{display:grid; grid-template-columns:repeat(4,1fr); gap:10px; width:100%; max-width:420px;}
+.opt-btn{
+  padding:12px; border-radius:12px; border:1px solid var(--border); background:rgba(255,255,255,.03);
+  color:var(--text-1); font-weight:800; font-size:16px; cursor:pointer; transition:.2s ease;
+}
+.opt-btn:hover{border-color:var(--accent);}
+.opt-btn.correct{background:rgba(51,225,154,.25); border-color:var(--success);}
+.opt-btn.wrong{background:rgba(255,84,112,.25); border-color:var(--danger);}
+.practice-score{font-size:13px; color:var(--text-2);}
+.practice-score b{color:var(--accent);}
+
+.history-item{
+  padding:12px 14px; border-radius:12px; border:1px solid var(--border); margin-bottom:8px;
+  background:rgba(255,255,255,.02); display:flex; justify-content:space-between; align-items:flex-start; gap:10px;
+}
+.history-meta{font-size:11px; color:var(--text-3); margin-top:4px;}
+.history-text{font-size:13.5px; word-break:break-word;}
+.history-actions{display:flex; gap:6px; flex-shrink:0;}
+.badge{font-size:10px; padding:3px 8px; border-radius:20px; border:1px solid var(--border); color:var(--text-2);}
+.badge.enc{color:var(--accent); border-color:var(--accent);}
+.badge.dec{color:var(--accent-2); border-color:var(--accent-2);}
+
+.stats-grid{display:grid; grid-template-columns:repeat(3,1fr); gap:12px;}
+@media(max-width:700px){.stats-grid{grid-template-columns:repeat(2,1fr);}}
+.stat-card{padding:16px; text-align:center; border-radius:14px; border:1px solid var(--border); background:rgba(255,255,255,.02);}
+.stat-num{font-size:26px; font-weight:900; color:var(--accent);}
+.stat-label{font-size:11.5px; color:var(--text-3); margin-top:4px;}
+
+.settings-row{display:flex; align-items:center; justify-content:space-between; padding:12px 0; border-bottom:1px solid var(--border);}
+.settings-row:last-child{border-bottom:none;}
+.settings-label{font-size:13.5px; font-weight:600;}
+.settings-sub{font-size:11px; color:var(--text-3);}
+.switch{position:relative; width:46px; height:26px; flex-shrink:0;}
+.switch input{opacity:0; width:0; height:0;}
+.slider{position:absolute; inset:0; background:rgba(255,255,255,.12); border-radius:20px; cursor:pointer; transition:.25s ease;}
+.slider::before{content:''; position:absolute; width:20px; height:20px; left:3px; top:3px; background:#fff; border-radius:50%; transition:.25s ease;}
+.switch input:checked + .slider{background:linear-gradient(135deg,var(--accent),var(--accent-2));}
+.switch input:checked + .slider::before{transform:translateX(20px);}
+html[dir="rtl"] .switch input:checked + .slider::before{transform:translateX(-20px);}
+
+.theme-grid{display:grid; grid-template-columns:repeat(4,1fr); gap:10px; margin-top:10px;}
+@media(max-width:700px){.theme-grid{grid-template-columns:repeat(2,1fr);}}
+.theme-chip{
+  padding:12px; border-radius:12px; border:1px solid var(--border); cursor:pointer; text-align:center;
+  font-size:12px; font-weight:700; transition:.2s ease; position:relative;
+}
+.theme-chip[data-t="cyberpunk"]{background:linear-gradient(135deg,#1a0430,#ff2ec4 200%);}
+.theme-chip[data-t="hacker"]{background:linear-gradient(135deg,#04120a,#33e19a 200%);}
+.theme-chip[data-t="material"]{background:linear-gradient(135deg,#15181c,#6ea8fe 200%);}
+.theme-chip[data-t="amoled"]{background:#000; border:1px solid #333;}
+.theme-chip.selected{outline:2px solid var(--accent); box-shadow:var(--glow);}
+
+.result-options{display:flex; gap:8px; flex-wrap:wrap; margin-bottom:10px;}
+.chip-toggle{
+  padding:7px 14px; border-radius:20px; border:1px solid var(--border); background:transparent; color:var(--text-2);
+  cursor:pointer; font-size:12px; font-weight:700; transition:.2s ease;
+}
+.chip-toggle.active{background:linear-gradient(135deg,var(--accent),var(--accent-2)); color:var(--bg-0); border-color:transparent;}
+
+.credit-link{
+  color:var(--accent); font-weight:800; text-decoration:none; cursor:pointer; letter-spacing:.5px;
+  text-shadow:0 0 8px rgba(0,229,255,.35); transition:.25s ease; border-bottom:1px dashed transparent;
+}
+.credit-link:hover{color:var(--accent-2); text-shadow:0 0 14px rgba(123,92,255,.6); border-bottom-color:var(--accent-2);}
+.app-footer{
+  margin-top:26px; padding:18px; text-align:center; font-size:12.5px; color:var(--text-3);
+}
+.app-footer .line2{margin-top:6px; font-size:11px;}
+
+.modal-overlay{
+  position:fixed; inset:0; background:rgba(2,3,8,.72); backdrop-filter:blur(4px); z-index:200;
+  display:none; align-items:center; justify-content:center; padding:16px; animation:fadeIn .25s ease;
+}
+.modal-overlay.show{display:flex;}
+@keyframes fadeIn{from{opacity:0;} to{opacity:1;}}
+.modal-box{max-width:460px; width:100%; padding:26px; text-align:center; animation:popIn .3s ease;}
+.modal-box h3{margin:6px 0 10px; font-size:19px;}
+.modal-box p{color:var(--text-2); font-size:13.5px; line-height:1.7;}
+.modal-close{margin-top:16px;}
+
+#toastContainer{
+  position:fixed; bottom:18px; left:50%; transform:translateX(-50%); z-index:400;
+  display:flex; flex-direction:column; gap:8px; width:min(92vw,380px);
+}
+.toast{
+  padding:12px 16px; border-radius:12px; font-size:13px; font-weight:600; display:flex; align-items:center; gap:8px;
+  animation:toastIn .3s ease, toastOut .3s ease 2.7s forwards; box-shadow:0 6px 20px rgba(0,0,0,.4);
+}
+.toast.success{border-left:4px solid var(--success);}
+.toast.error{border-left:4px solid var(--danger);}
+.toast.info{border-left:4px solid var(--accent);}
+html[dir="rtl"] .toast.success{border-left:none; border-right:4px solid var(--success);}
+html[dir="rtl"] .toast.error{border-left:none; border-right:4px solid var(--danger);}
+html[dir="rtl"] .toast.info{border-left:none; border-right:4px solid var(--accent);}
+@keyframes toastIn{from{opacity:0; transform:translateY(20px);} to{opacity:1; transform:translateY(0);}}
+@keyframes toastOut{to{opacity:0; transform:translateY(-10px);}}
+
+.empty-state{text-align:center; padding:30px 10px; color:var(--text-3); font-size:13px;}
+.search-bar{position:relative; margin-bottom:10px;}
+label.field-label{font-size:12px; color:var(--text-2); font-weight:700; margin-bottom:6px; display:block;}
+.file-input-hidden{display:none;}
+</style>
+</head>
+<body>
+
+<div id="app">
+
+  <header class="app-header glass">
+    <div class="brand">
+      <div class="brand-logo">𓂀</div>
+      <div>
+        <div class="brand-title" data-i18n="appTitle">أداة شفرة بيجبن</div>
+        <div class="brand-sub" data-i18n="appSubtitle">Pigpen Cipher Toolkit</div>
+      </div>
+    </div>
+    <div class="header-actions">
+      <button class="icon-btn" id="langToggleBtn" title="Language">🌐 <span id="langBtnLabel">EN</span></button>
+      <button class="icon-btn" id="themeCycleBtn" title="Theme">🎨</button>
+      <button class="icon-btn" id="aboutBtn" title="About">ℹ️</button>
+    </div>
+  </header>
+
+  <nav class="tabs-nav glass" id="tabsNav">
+    <button class="tab-btn active" data-tab="decode"><span class="ic">🔓</span><span data-i18n="tabDecode">فك التشفير</span></button>
+    <button class="tab-btn" data-tab="encode"><span class="ic">🔐</span><span data-i18n="tabEncode">ترميز</span></button>
+    <button class="tab-btn" data-tab="dictionary"><span class="ic">📖</span><span data-i18n="tabDictionary">القاموس</span></button>
+    <button class="tab-btn" data-tab="practice"><span class="ic">🎯</span><span data-i18n="tabPractice">تدريب</span></button>
+    <button class="tab-btn" data-tab="history"><span class="ic">🕓</span><span data-i18n="tabHistory">السجل</span></button>
+    <button class="tab-btn" data-tab="settings"><span class="ic">⚙️</span><span data-i18n="tabSettings">الإعدادات</span></button>
+  </nav>
+
+  <section class="tab-panel active" id="panel-decode">
+    <div class="card glass">
+      <h2>🔓 <span data-i18n="decodeTitle">فك التشفير: بيجبن ← إنجليزي</span></h2>
+      <p class="hint" data-i18n="decodeHint">اضغط على الرموز أدناه لبناء الرسالة المشفرة، وستظهر الترجمة تلقائيًا.</p>
+
+      <label class="field-label" data-i18n="pigpenMessage">رسالة بيجبن</label>
+      <div class="symbol-output" id="decodeOutput">
+        <span class="placeholder" data-i18n="clickSymbolsHint">اضغط على رموز بيجبن لبنائها هنا...</span>
+      </div>
+
+      <div class="btn-row">
+        <button class="btn ghost sm" id="decodeSpaceBtn" data-i18n="addSpace">مسافة</button>
+        <button class="btn ghost sm" id="decodeBackspaceBtn" data-i18n="backspace">حذف</button>
+        <button class="btn danger sm" id="decodeClearBtn" data-i18n="clearAll">مسح الكل</button>
+      </div>
+
+      <div class="result-options" id="decodeLangOptions">
+        <button class="chip-toggle" data-lang="en" data-i18n="showEnglish">الإنجليزية فقط</button>
+        <button class="chip-toggle" data-lang="ar" data-i18n="showArabic">العربية فقط</button>
+        <button class="chip-toggle active" data-lang="both" data-i18n="showBoth">الإنجليزية + العربية</button>
+      </div>
+
+      <label class="field-label" data-i18n="englishResult">النتيجة (إنجليزي)</label>
+      <div class="result-box" id="decodeEnResult"><span class="placeholder" data-i18n="resultPlaceholder">ستظهر النتيجة هنا</span></div>
+
+      <label class="field-label" style="margin-top:10px;" data-i18n="arabicTranslation">الترجمة العربية</label>
+      <div class="result-box ar" id="decodeArResult"><span class="placeholder" data-i18n="resultPlaceholder">ستظهر النتيجة هنا</span></div>
+
+      <div class="btn-row">
+        <button class="btn ghost sm" data-copy="decodeEn" data-i18n="copyEnglish">نسخ الإنجليزية</button>
+        <button class="btn ghost sm" data-copy="decodeAr" data-i18n="copyArabic">نسخ العربية</button>
+        <button class="btn sm" data-copy="decodeAll" data-i18n="copyAll">نسخ الكل</button>
+      </div>
+    </div>
+
+    <div class="card glass palette-wrap">
+      <h2>⌨️ <span data-i18n="symbolPalette">لوحة رموز بيجبن</span></h2>
+      <p class="hint" data-i18n="paletteHint">مرتبة حسب الشبكة الأصلية وليس حسب الحروف.</p>
+      <div class="palette-group-label" data-i18n="gridGroup1">الشبكة الأولى (بدون نقطة)</div>
+      <div class="palette-grid" id="paletteGrid1"></div>
+      <div class="palette-group-label" data-i18n="gridGroup2">الشبكة الثانية (بنقطة)</div>
+      <div class="palette-grid" id="paletteGrid2"></div>
+      <div class="palette-group-label" data-i18n="gridGroup3">شبكة X (بدون نقطة / بنقطة)</div>
+      <div class="palette-grid" id="paletteGrid3" style="grid-template-columns:repeat(8,1fr);"></div>
+    </div>
+  </section>
+
+  <section class="tab-panel" id="panel-encode">
+    <div class="card glass">
+      <h2>🔐 <span data-i18n="encodeTitle">ترميز: إنجليزي ← بيجبن</span></h2>
+      <p class="hint" data-i18n="encodeHint">اكتب النص الإنجليزي وسيتم تحويله فورًا إلى رموز بيجبن.</p>
+      <label class="field-label" data-i18n="englishInput">النص الإنجليزي</label>
+      <textarea id="encodeInput" placeholder="Type text here / اكتب هنا..." spellcheck="false"></textarea>
+      <div class="btn-row">
+        <button class="btn danger sm" id="encodeClearBtn" data-i18n="clearAll">مسح الكل</button>
+        <button class="btn ghost sm" id="encodeImportBtn" data-i18n="importFile">استيراد ملف</button>
+        <input type="file" id="encodeImportInput" class="file-input-hidden" accept=".txt,.json">
+      </div>
+      <label class="field-label" style="margin-top:14px;" data-i18n="pigpenOutput">مخرجات بيجبن</label>
+      <div class="symbol-output" id="encodeOutput">
+        <span class="placeholder" data-i18n="typeHint">ابدأ الكتابة لرؤية الرموز</span>
+      </div>
+      <div class="btn-row">
+        <button class="btn ghost sm" data-copy="encodeAll" data-i18n="copyAll">نسخ الكل</button>
+        <button class="btn ghost sm" id="exportTxtBtn">Export .TXT</button>
+        <button class="btn ghost sm" id="exportJsonBtn">Export .JSON</button>
+        <button class="btn ghost sm" id="exportCsvBtn">Export .CSV</button>
+      </div>
+    </div>
+  </section>
+
+  <section class="tab-panel" id="panel-dictionary">
+    <div class="card glass">
+      <h2>📖 <span data-i18n="dictTitle">القاموس الداخلي (Offline)</span></h2>
+      <p class="hint" data-i18n="dictHint">ابحث داخل قاموس الكلمات المدعومة للترجمة التلقائية بعد فك التشفير.</p>
+      <div class="search-bar">
+        <input type="text" id="dictSearchInput" placeholder="Search word / ابحث عن كلمة...">
+      </div>
+      <div class="result-options">
+        <button class="chip-toggle active" data-filter="all" data-i18n="allWords">الكل</button>
+        <button class="chip-toggle" data-filter="fav" data-i18n="favoritesOnly">المفضلة فقط</button>
+      </div>
+      <div class="dict-list" id="dictList"></div>
+    </div>
+  </section>
+
+  <section class="tab-panel" id="panel-practice">
+    <div class="card glass">
+      <h2>🎯 <span data-i18n="practiceTitle">وضع التدريب</span></h2>
+      <p class="hint" data-i18n="practiceHint">تعلم رموز بيجبن عن طريق تخمين الحرف الصحيح لكل رمز.</p>
+      <div class="practice-stage">
+        <div class="practice-symbol" id="practiceSymbol"></div>
+        <div class="practice-options" id="practiceOptions"></div>
+        <div class="practice-score">
+          <span data-i18n="score">النتيجة</span>: <b id="practiceScore">0</b> / <span id="practiceTotal">0</span>
+        </div>
+        <button class="btn sm" id="practiceNextBtn" data-i18n="nextSymbol">الرمز التالي</button>
+      </div>
+    </div>
+  </section>
+
+  <section class="tab-panel" id="panel-history">
+    <div class="card glass">
+      <h2>🕓 <span data-i18n="historyTitle">سجل العمليات</span></h2>
+      <p class="hint" data-i18n="historyHint">يتم حفظ آخر 50 عملية تلقائيًا على جهازك (LocalStorage).</p>
+      <div class="btn-row" style="margin-top:0;">
+        <button class="btn danger sm" id="clearHistoryBtn" data-i18n="clearHistory">مسح السجل</button>
+      </div>
+      <div id="historyList" style="margin-top:14px;"></div>
+    </div>
+
+    <div class="card glass">
+      <h2>📊 <span data-i18n="statsTitle">الإحصائيات</span></h2>
+      <div class="stats-grid">
+        <div class="stat-card"><div class="stat-num" id="statSymbols">0</div><div class="stat-label" data-i18n="statSymbols">عدد الرموز</div></div>
+        <div class="stat-card"><div class="stat-num" id="statLetters">0</div><div class="stat-label" data-i18n="statLetters">عدد الحروف</div></div>
+        <div class="stat-card"><div class="stat-num" id="statWords">0</div><div class="stat-label" data-i18n="statWords">عدد الكلمات</div></div>
+        <div class="stat-card"><div class="stat-num" id="statCopies">0</div><div class="stat-label" data-i18n="statCopies">مرات النسخ</div></div>
+        <div class="stat-card"><div class="stat-num" id="statEncodes">0</div><div class="stat-label" data-i18n="statEncodes">مرات الترميز</div></div>
+        <div class="stat-card"><div class="stat-num" id="statDecodes">0</div><div class="stat-label" data-i18n="statDecodes">مرات فك التشفير</div></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="tab-panel" id="panel-settings">
+    <div class="card glass">
+      <h2>⚙️ <span data-i18n="settingsTitle">الإعدادات العامة</span></h2>
+
+      <div class="settings-row">
+        <div><div class="settings-label" data-i18n="settingLang">لغة الواجهة</div><div class="settings-sub" data-i18n="settingLangSub">التبديل الفوري بدون إعادة تحميل</div></div>
+        <select id="settingsLangSelect" style="width:auto;">
+          <option value="ar">العربية</option>
+          <option value="en">English</option>
+        </select>
+      </div>
+
+      <div class="settings-row">
+        <div><div class="settings-label" data-i18n="settingAutoTranslate">الترجمة التلقائية</div><div class="settings-sub" data-i18n="settingAutoTranslateSub">ترجمة النص فور فك التشفير</div></div>
+        <label class="switch"><input type="checkbox" id="settingAutoTranslate" checked><span class="slider"></span></label>
+      </div>
+
+      <div class="settings-row">
+        <div><div class="settings-label" data-i18n="settingAutoCopy">النسخ التلقائي</div><div class="settings-sub" data-i18n="settingAutoCopySub">نسخ النتيجة تلقائيًا بعد كل عملية</div></div>
+        <label class="switch"><input type="checkbox" id="settingAutoCopy"><span class="slider"></span></label>
+      </div>
+
+      <div class="settings-row">
+        <div><div class="settings-label" data-i18n="settingSound">المؤثرات الصوتية</div><div class="settings-sub" data-i18n="settingSoundSub">صوت خفيف عند الضغط على الرموز</div></div>
+        <label class="switch"><input type="checkbox" id="settingSound"><span class="slider"></span></label>
+      </div>
+
+      <div class="settings-row">
+        <div><div class="settings-label" data-i18n="settingAutosave">الحفظ التلقائي للسجل</div><div class="settings-sub" data-i18n="settingAutosaveSub">حفظ كل عملية داخل السجل تلقائيًا</div></div>
+        <label class="switch"><input type="checkbox" id="settingAutosave" checked><span class="slider"></span></label>
+      </div>
+    </div>
+
+    <div class="card glass">
+      <h2>🎨 <span data-i18n="settingTheme">الثيمات</span></h2>
+      <div class="theme-grid">
+        <div class="theme-chip" data-t="cyberpunk">Cyberpunk</div>
+        <div class="theme-chip" data-t="hacker">Hacker Green</div>
+        <div class="theme-chip" data-t="material">Material Dark</div>
+        <div class="theme-chip" data-t="amoled">AMOLED Black</div>
+      </div>
+    </div>
+
+    <div class="card glass">
+      <h2>ℹ️ <span data-i18n="aboutAppInfo">معلومات التطبيق</span></h2>
+      <p class="hint" style="margin-bottom:14px;">
+        <span data-i18n="appName">Pigpen Cipher Toolkit</span> — <span id="settingsVersion"></span>
+      </p>
+      <div class="settings-sub">
+        <span data-i18n="developedBy">تطوير</span>:
+        <a class="credit-link" id="settingsCreditLink" target="_blank" rel="noopener noreferrer"></a>
+      </div>
+    </div>
+  </section>
+
+  <footer class="app-footer glass">
+    <div>
+      <span data-i18n="footerRights">جميع الحقوق محفوظة</span> © <span id="footerYear"></span>
+      —
+      <a class="credit-link" id="footerCreditLink" target="_blank" rel="noopener noreferrer"></a>
+    </div>
+    <div class="line2" data-i18n="footerTagline">Pigpen Cipher Toolkit — Offline · No External Libraries</div>
+  </footer>
+
+</div>
+
+<div class="modal-overlay" id="welcomeModal">
+  <div class="modal-box glass">
+    <div style="font-size:38px;">🔐</div>
+    <h3 data-i18n="welcomeTitle">مرحبًا بك في Pigpen Cipher Toolkit</h3>
+    <p data-i18n="welcomeBody">أداة احترافية لترميز وفك تشفير رموز بيجبن بالكامل داخل متصفحك، بدون إنترنت وبدون أي مكتبات خارجية.</p>
+    <p class="settings-sub" style="margin-top:14px;">
+      <span data-i18n="developedBy">تطوير</span>:
+      <a class="credit-link" id="welcomeCreditLink" target="_blank" rel="noopener noreferrer"></a>
+    </p>
+    <button class="btn modal-close" id="welcomeCloseBtn" data-i18n="startNow">ابدأ الآن</button>
+  </div>
+</div>
+
+<div class="modal-overlay" id="aboutModal">
+  <div class="modal-box glass">
+    <div style="font-size:34px;">ℹ️</div>
+    <h3 data-i18n="aboutTitle">حول التطبيق</h3>
+    <p data-i18n="aboutBody">Pigpen Cipher Toolkit هو مشروع مفتوح المصدر يعمل بالكامل داخل المتصفح، ويوفر أدوات كاملة للترميز وفك التشفير والتعلم والتدريب على شفرة بيجبن.</p>
+    <p class="settings-sub" style="margin-top:14px;">
+      <span data-i18n="developedBy">تطوير</span>:
+      <a class="credit-link" id="aboutCreditLink" target="_blank" rel="noopener noreferrer"></a>
+    </p>
+    <button class="btn ghost modal-close" id="aboutCloseBtn" data-i18n="close">إغلاق</button>
+  </div>
+</div>
+
+<div id="toastContainer"></div>
+
+<script>
+'use strict';
+const CONFIG = {
+  appName: 'Pigpen Cipher Toolkit',
+  version: '1.0.0',
+  year: new Date().getFullYear(),
+  historyLimit: 50,
+  defaultLang: 'ar',
+  defaultTheme: 'cyberpunk',
+  themes: ['cyberpunk', 'hacker', 'material', 'amoled'],
+  credits: {
+    ownerName: '𝔐𝔬𝔥𝔞𝔪𝔪𝔞𝔡 𝕊𝔞𝔩𝔢𝔪 𓂀',
+    ownerUrl: 'https://shorturl.at/zj4Hc'
+  },
+  storageKeys: {
+    history: 'pigpen_history_v1',
+    favorites: 'pigpen_favorites_v1',
+    settings: 'pigpen_settings_v1',
+    stats: 'pigpen_stats_v1'
+  }
+};
+
+const STATE = {
+  lang: CONFIG.defaultLang,
+  theme: CONFIG.defaultTheme,
+  activeTab: 'decode',
+  decodeBuffer: [],
+  decodeResultLangMode: 'both',
+  settings: {
+    autoTranslate: true,
+    autoCopy: false,
+    sound: false,
+    autosave: true
+  },
+  stats: { symbols: 0, letters: 0, words: 0, copies: 0, encodes: 0, decodes: 0 },
+  history: [],
+  favorites: [],
+  practice: { current: null, score: 0, total: 0 }
+};
+
+
+const UI_TEXT = {
+  ar: {
+    appTitle:'أداة شفرة بيجبن', appSubtitle:'Pigpen Cipher Toolkit',
+    tabDecode:'فك التشفير', tabEncode:'ترميز', tabDictionary:'القاموس', tabPractice:'تدريب', tabHistory:'السجل', tabSettings:'الإعدادات',
+    decodeTitle:'فك التشفير: بيجبن ← إنجليزي', decodeHint:'اضغط على الرموز أدناه لبناء الرسالة المشفرة، وستظهر الترجمة تلقائيًا.',
+    pigpenMessage:'رسالة بيجبن', clickSymbolsHint:'اضغط على رموز بيجبن لبنائها هنا...',
+    addSpace:'مسافة', backspace:'حذف', clearAll:'مسح الكل',
+    showEnglish:'الإنجليزية فقط', showArabic:'العربية فقط', showBoth:'الإنجليزية + العربية',
+    englishResult:'النتيجة (إنجليزي)', arabicTranslation:'الترجمة العربية', resultPlaceholder:'ستظهر النتيجة هنا',
+    copyEnglish:'نسخ الإنجليزية', copyArabic:'نسخ العربية', copyAll:'نسخ الكل',
+    symbolPalette:'لوحة رموز بيجبن', paletteHint:'مرتبة حسب الشبكة الأصلية وليس حسب الحروف.',
+    gridGroup1:'الشبكة الأولى (بدون نقطة)', gridGroup2:'الشبكة الثانية (بنقطة)', gridGroup3:'شبكة X (بدون نقطة / بنقطة)',
+    encodeTitle:'ترميز: إنجليزي ← بيجبن', encodeHint:'اكتب النص الإنجليزي وسيتم تحويله فورًا إلى رموز بيجبن.',
+    englishInput:'النص الإنجليزي', importFile:'استيراد ملف', pigpenOutput:'مخرجات بيجبن', typeHint:'ابدأ الكتابة لرؤية الرموز',
+    dictTitle:'القاموس الداخلي (Offline)', dictHint:'ابحث داخل قاموس الكلمات المدعومة للترجمة التلقائية بعد فك التشفير.',
+    allWords:'الكل', favoritesOnly:'المفضلة فقط',
+    practiceTitle:'وضع التدريب', practiceHint:'تعلم رموز بيجبن عن طريق تخمين الحرف الصحيح لكل رمز.',
+    score:'النتيجة', nextSymbol:'الرمز التالي',
+    historyTitle:'سجل العمليات', historyHint:'يتم حفظ آخر 50 عملية تلقائيًا على جهازك (LocalStorage).', clearHistory:'مسح السجل',
+    statsTitle:'الإحصائيات', statSymbols:'عدد الرموز', statLetters:'عدد الحروف', statWords:'عدد الكلمات',
+    statCopies:'مرات النسخ', statEncodes:'مرات الترميز', statDecodes:'مرات فك التشفير',
+    settingsTitle:'الإعدادات العامة', settingLang:'لغة الواجهة', settingLangSub:'التبديل الفوري بدون إعادة تحميل',
+    settingAutoTranslate:'الترجمة التلقائية', settingAutoTranslateSub:'ترجمة النص فور فك التشفير',
+    settingAutoCopy:'النسخ التلقائي', settingAutoCopySub:'نسخ النتيجة تلقائيًا بعد كل عملية',
+    settingSound:'المؤثرات الصوتية', settingSoundSub:'صوت خفيف عند الضغط على الرموز',
+    settingAutosave:'الحفظ التلقائي للسجل', settingAutosaveSub:'حفظ كل عملية داخل السجل تلقائيًا',
+    settingTheme:'الثيمات', aboutAppInfo:'معلومات التطبيق', appName:'Pigpen Cipher Toolkit', developedBy:'تطوير',
+    footerRights:'جميع الحقوق محفوظة', footerTagline:'Pigpen Cipher Toolkit — يعمل بدون إنترنت · بدون مكتبات خارجية',
+    welcomeTitle:'مرحبًا بك في Pigpen Cipher Toolkit',
+    welcomeBody:'أداة احترافية لترميز وفك تشفير رموز بيجبن بالكامل داخل متصفحك، بدون إنترنت وبدون أي مكتبات خارجية.',
+    startNow:'ابدأ الآن', aboutTitle:'حول التطبيق',
+    aboutBody:'Pigpen Cipher Toolkit هو مشروع مفتوح المصدر يعمل بالكامل داخل المتصفح، ويوفر أدوات كاملة للترميز وفك التشفير والتعلم والتدريب على شفرة بيجبن.',
+    close:'إغلاق', noTranslation:'لا توجد ترجمة', copiedMsg:'تم النسخ بنجاح', clearedMsg:'تم المسح',
+    historyClearedMsg:'تم مسح السجل', historyEmptyMsg:'لا يوجد سجل بعد', dictEmptyMsg:'لا توجد نتائج',
+    exportedMsg:'تم التصدير بنجاح', importedMsg:'تم الاستيراد بنجاح', importErrorMsg:'حدث خطأ أثناء الاستيراد',
+    themeChangedMsg:'تم تغيير الثيم', correctMsg:'إجابة صحيحة!', wrongMsg:'إجابة خاطئة، حاول مجددًا'
+  },
+  en: {
+    appTitle:'Pigpen Cipher Toolkit', appSubtitle:'شفرة بيجبن',
+    tabDecode:'Decode', tabEncode:'Encode', tabDictionary:'Dictionary', tabPractice:'Practice', tabHistory:'History', tabSettings:'Settings',
+    decodeTitle:'Decode: Pigpen → English', decodeHint:'Tap the symbols below to build your encoded message — translation updates live.',
+    pigpenMessage:'Pigpen Message', clickSymbolsHint:'Tap pigpen symbols to build your message here...',
+    addSpace:'Space', backspace:'Backspace', clearAll:'Clear All',
+    showEnglish:'English Only', showArabic:'Arabic Only', showBoth:'English + Arabic',
+    englishResult:'Result (English)', arabicTranslation:'Arabic Translation', resultPlaceholder:'Result will appear here',
+    copyEnglish:'Copy English', copyArabic:'Copy Arabic', copyAll:'Copy All',
+    symbolPalette:'Pigpen Symbol Keyboard', paletteHint:'Arranged by the original grid layout, not alphabetically.',
+    gridGroup1:'Grid One (No Dot)', gridGroup2:'Grid Two (Dotted)', gridGroup3:'X Grids (Plain / Dotted)',
+    encodeTitle:'Encode: English → Pigpen', encodeHint:'Type English text and it will instantly convert to pigpen symbols.',
+    englishInput:'English Text', importFile:'Import File', pigpenOutput:'Pigpen Output', typeHint:'Start typing to see symbols',
+    dictTitle:'Offline Built-in Dictionary', dictHint:'Search the built-in word list used for auto-translation after decoding.',
+    allWords:'All', favoritesOnly:'Favorites Only',
+    practiceTitle:'Practice Mode', practiceHint:'Learn pigpen symbols by guessing the correct letter for each symbol.',
+    score:'Score', nextSymbol:'Next Symbol',
+    historyTitle:'Operation History', historyHint:'The last 50 operations are saved automatically on your device (LocalStorage).', clearHistory:'Clear History',
+    statsTitle:'Statistics', statSymbols:'Symbols', statLetters:'Letters', statWords:'Words',
+    statCopies:'Copies', statEncodes:'Encodes', statDecodes:'Decodes',
+    settingsTitle:'General Settings', settingLang:'Interface Language', settingLangSub:'Switch instantly, no reload',
+    settingAutoTranslate:'Auto Translate', settingAutoTranslateSub:'Translate text right after decoding',
+    settingAutoCopy:'Auto Copy', settingAutoCopySub:'Automatically copy the result after each operation',
+    settingSound:'Sound Effects', settingSoundSub:'Light click sound on symbol press',
+    settingAutosave:'Auto Save History', settingAutosaveSub:'Automatically save every operation to history',
+    settingTheme:'Themes', aboutAppInfo:'App Info', appName:'Pigpen Cipher Toolkit', developedBy:'Developed by',
+    footerRights:'All Rights Reserved', footerTagline:'Pigpen Cipher Toolkit — Fully Offline · No External Libraries',
+    welcomeTitle:'Welcome to Pigpen Cipher Toolkit',
+    welcomeBody:'A professional tool to encode and decode pigpen cipher entirely inside your browser — fully offline, no external libraries.',
+    startNow:'Get Started', aboutTitle:'About This App',
+    aboutBody:'Pigpen Cipher Toolkit is an open-source project that runs entirely in the browser, providing complete tools to encode, decode, learn and practice the pigpen cipher.',
+    close:'Close', noTranslation:'No Translation', copiedMsg:'Copied successfully', clearedMsg:'Cleared',
+    historyClearedMsg:'History cleared', historyEmptyMsg:'No history yet', dictEmptyMsg:'No results',
+    exportedMsg:'Exported successfully', importedMsg:'Imported successfully', importErrorMsg:'Error while importing',
+    themeChangedMsg:'Theme changed', correctMsg:'Correct answer!', wrongMsg:'Wrong answer, try again'
+  }
+};
+function t(key){ return (UI_TEXT[STATE.lang] && UI_TEXT[STATE.lang][key]) || key; }
+
+
+const DICTIONARY = {
+  a:'حرف A', about:'حول', above:'فوق', after:'بعد', again:'مرة أخرى', all:'الكل', also:'أيضًا',
+  am:'أنا', an:'أداة تعريف', and:'و', any:'أي', are:'تكون', as:'كما', at:'في',
+  be:'يكون', because:'لأن', been:'كان', before:'قبل', best:'الأفضل', big:'كبير', book:'كتاب',
+  but:'لكن', by:'بواسطة', call:'يتصل', can:'يستطيع', cat:'قطة', code:'شفرة', come:'يأتي',
+  day:'يوم', do:'يفعل', dog:'كلب', down:'أسفل', easy:'سهل', eat:'يأكل', end:'نهاية',
+  every:'كل', fast:'سريع', find:'يجد', first:'أول', for:'من أجل', friend:'صديق', from:'من',
+  get:'يحصل', give:'يعطي', go:'يذهب', good:'جيد', great:'رائع', hard:'صعب', have:'يملك',
+  he:'هو', hello:'مرحبا', help:'مساعدة', her:'لها', here:'هنا', hi:'مرحبا', his:'له',
+  home:'منزل', house:'بيت', how:'كيف', i:'أنا', if:'إذا', in:'في', into:'داخل',
+  is:'يكون', it:'هو (غير عاقل)', its:'ملكه', just:'فقط', keep:'يحافظ', key:'مفتاح',
+  know:'يعرف', last:'الأخير', learn:'يتعلم', let:'دع', life:'حياة', like:'يحب', little:'صغير',
+  live:'يعيش', long:'طويل', look:'ينظر', love:'حب', made:'صنع', make:'يصنع', man:'رجل',
+  many:'كثير', may:'قد', me:'أنا (مفعول)', more:'المزيد', most:'الأكثر', mother:'أم', move:'يتحرك',
+  much:'كثيرًا', must:'يجب', my:'ملكي', name:'اسم', need:'يحتاج', never:'أبدًا', new:'جديد',
+  night:'ليلة', no:'لا', not:'ليس', now:'الآن', number:'رقم', of:'من', off:'مغلق',
+  ok:'حسنًا', old:'قديم', on:'على', one:'واحد', only:'فقط', open:'مفتوح', or:'أو',
+  other:'آخر', our:'لنا', out:'خارج', over:'فوق', own:'ملك', people:'ناس', place:'مكان',
+  play:'يلعب', please:'من فضلك', put:'يضع', right:'صحيح', run:'يجري', said:'قال', same:'نفسه',
+  say:'يقول', school:'مدرسة', secret:'سر', see:'يرى', she:'هي', show:'يظهر', small:'صغير',
+  so:'لذلك', some:'بعض', still:'لا يزال', student:'طالب', such:'مثل هذا', take:'يأخذ',
+  tell:'يخبر', text:'نص', than:'من', that:'ذلك', the:'أداة تعريف', their:'لهم', them:'هم',
+  then:'ثم', there:'هناك', these:'هؤلاء', they:'هم', thing:'شيء', think:'يفكر', this:'هذا',
+  time:'وقت', to:'إلى', too:'أيضًا', try:'يحاول', up:'أعلى', us:'لنا', use:'يستخدم',
+  very:'جدًا', want:'يريد', was:'كان', water:'ماء', way:'طريقة', we:'نحن', well:'حسنًا',
+  what:'ماذا', when:'متى', where:'أين', which:'أي', who:'من', why:'لماذا', will:'سوف',
+  with:'مع', word:'كلمة', work:'عمل', world:'عالم', would:'سوف', write:'يكتب', year:'سنة',
+  you:'أنت', your:'ملكك', hello_world:'مرحبا بالعالم', cipher:'شفرة', message:'رسالة',
+  decode:'فك التشفير', encode:'ترميز', symbol:'رمز', letter:'حرف', pigpen:'بيجبن'
+};
+
+
+const CipherEngine = (() => {
+  const ORDER = ['top','right','bottom','left']; 
+
+  function buildSymbolSVG(index){
+    const box = 60;
+    let lines = [];
+    let dot = null;
+
+    if(index < 18){
+      const gridIndex = Math.floor(index / 9);
+      const cell = index % 9;
+      const r = Math.floor(cell / 3), c = cell % 3;
+      const topInternal = r > 0, bottomInternal = r < 2, leftInternal = c > 0, rightInternal = c < 2;
+      if(topInternal) lines.push([0,0,box,0]);
+      if(bottomInternal) lines.push([0,box,box,box]);
+      if(leftInternal) lines.push([0,0,0,box]);
+      if(rightInternal) lines.push([box,0,box,box]);
+      if(gridIndex === 1) dot = [box/2, box/2];
+    } else {
+      const idx2 = index - 18;
+      const pairIndex = Math.floor(idx2 / 4); 
+      const quad = ORDER[idx2 % 4];
+      const cx = box/2, cy = box/2;
+      const corners = { tl:[0,0], tr:[box,0], br:[box,box], bl:[0,box] };
+      if(quad === 'top'){ lines.push([cx,cy,...corners.tl]); lines.push([cx,cy,...corners.tr]); dot = [cx, cy-14]; }
+      if(quad === 'right'){ lines.push([cx,cy,...corners.tr]); lines.push([cx,cy,...corners.br]); dot = [cx+14, cy]; }
+      if(quad === 'bottom'){ lines.push([cx,cy,...corners.br]); lines.push([cx,cy,...corners.bl]); dot = [cx, cy+14]; }
+      if(quad === 'left'){ lines.push([cx,cy,...corners.bl]); lines.push([cx,cy,...corners.tl]); dot = [cx-14, cy]; }
+      if(pairIndex === 0) dot = null;
+    }
+
+    let svg = `<svg viewBox="0 0 ${box} ${box}" xmlns="http://www.w3.org/2000/svg">`;
+    svg += `<g stroke="currentColor" stroke-width="6" stroke-linecap="round" fill="none" style="color:var(--accent)">`;
+    lines.forEach(l => { svg += `<line x1="${l[0]}" y1="${l[1]}" x2="${l[2]}" y2="${l[3]}"/>`; });
+    svg += `</g>`;
+    if(dot) svg += `<circle cx="${dot[0]}" cy="${dot[1]}" r="5" fill="var(--accent-2)"/>`;
+    svg += `</svg>`;
+    return svg;
+  }
+
+  const SYMBOL_CACHE = {};
+  for(let i=0;i<26;i++){ SYMBOL_CACHE[String.fromCharCode(65+i)] = buildSymbolSVG(i); }
+
+  function letterToSVG(letter){ return SYMBOL_CACHE[letter.toUpperCase()] || ''; }
+
+  function encodeText(text){
+    const out = [];
+    for(const ch of text){
+      if(/[a-zA-Z]/.test(ch)){
+        out.push({type:'letter', char: ch.toUpperCase(), svg: letterToSVG(ch)});
+      } else if(ch === ' '){
+        out.push({type:'space', char:' '});
+      } else if(ch === '\n'){
+        out.push({type:'newline', char:'\n'});
+      } else {
+        out.push({type:'punct', char: ch});
+      }
+    }
+    return out;
+  }
+
+  function bufferToEnglish(buffer){
+    return buffer.map(item => {
+      if(item.type === 'letter') return item.char;
+      if(item.type === 'space') return ' ';
+      if(item.type === 'newline') return '\n';
+      return item.char;
+    }).join('');
+  }
+
+  return { letterToSVG, encodeText, bufferToEnglish, SYMBOL_CACHE };
+})();
+
+
+const TranslationEngine = (() => {
+  function translateWord(word){
+    const clean = word.toLowerCase().replace(/[^a-z]/g,'');
+    if(!clean) return null;
+    return DICTIONARY[clean] || null;
+  }
+  function translateSentence(sentence){
+    const words = sentence.trim().split(/\s+/).filter(Boolean);
+    if(words.length === 0) return { text:'', found:false };
+    const parts = words.map(w => translateWord(w) || `[${t('noTranslation')}]`);
+    const found = words.some(w => translateWord(w) !== null);
+    return { text: parts.join(' '), found };
+  }
+  return { translateWord, translateSentence };
+})();
+
+
+const StorageManager = (() => {
+  function save(key, value){
+    try{ localStorage.setItem(key, JSON.stringify(value)); }catch(e){ console.warn('Storage save failed', e); }
+  }
+  function load(key, fallback){
+    try{ const raw = localStorage.getItem(key); return raw ? JSON.parse(raw) : fallback; }
+    catch(e){ return fallback; }
+  }
+  return { save, load };
+})();
+
+
+const HistoryManager = (() => {
+  function add(entry){
+    if(!STATE.settings.autosave) return;
+    STATE.history.unshift({ ...entry, id: Date.now() + Math.random().toString(16).slice(2), ts: new Date().toISOString() });
+    if(STATE.history.length > CONFIG.historyLimit) STATE.history.length = CONFIG.historyLimit;
+    StorageManager.save(CONFIG.storageKeys.history, STATE.history);
+    UIRenderer.renderHistory();
+  }
+  function clear(){
+    STATE.history = [];
+    StorageManager.save(CONFIG.storageKeys.history, STATE.history);
+    UIRenderer.renderHistory();
+  }
+  function remove(id){
+    STATE.history = STATE.history.filter(h => h.id !== id);
+    StorageManager.save(CONFIG.storageKeys.history, STATE.history);
+    UIRenderer.renderHistory();
+  }
+  return { add, clear, remove };
+})();
+
+const Utils = (() => {
+  function debounce(fn, delay=180){
+    let timer = null;
+    return (...args) => { clearTimeout(timer); timer = setTimeout(() => fn(...args), delay); };
+  }
+  function escapeHtml(str){
+    return String(str).replace(/[&<>"']/g, s => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[s]));
+  }
+  function downloadBlob(content, filename, mime){
+    const blob = new Blob([content], {type: mime});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = filename; document.body.appendChild(a); a.click();
+    document.body.removeChild(a); URL.revokeObjectURL(url);
+  }
+  function copyText(text){
+    if(!text) return Promise.reject('empty');
+    if(navigator.clipboard && navigator.clipboard.writeText){ return navigator.clipboard.writeText(text); }
+    return new Promise((resolve) => {
+      const ta = document.createElement('textarea'); ta.value = text; document.body.appendChild(ta);
+      ta.select(); document.execCommand('copy'); document.body.removeChild(ta); resolve();
+    });
+  }
+  function playClick(){
+    if(!STATE.settings.sound) return;
+    try{
+      const ctx = new (window.AudioContext || window.webkitAudioContext)();
+      const osc = ctx.createOscillator(); const gain = ctx.createGain();
+      osc.type = 'sine'; osc.frequency.value = 880;
+      gain.gain.setValueAtTime(.08, ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(.0001, ctx.currentTime + .12);
+      osc.connect(gain); gain.connect(ctx.destination);
+      osc.start(); osc.stop(ctx.currentTime + .12);
+    }catch(e){}
+  }
+  function addRipple(e, el){
+    const rect = el.getBoundingClientRect();
+    const ripple = document.createElement('span');
+    ripple.className = 'ripple';
+    const size = Math.max(rect.width, rect.height);
+    ripple.style.width = ripple.style.height = size + 'px';
+    ripple.style.left = ((e.clientX ?? rect.left + rect.width/2) - rect.left - size/2) + 'px';
+    ripple.style.top = ((e.clientY ?? rect.top + rect.height/2) - rect.top - size/2) + 'px';
+    el.style.position = el.style.position || 'relative';
+    el.appendChild(ripple);
+    setTimeout(() => ripple.remove(), 600);
+  }
+  return { debounce, escapeHtml, downloadBlob, copyText, playClick, addRipple };
+})();
+
+
+const ToastManager = (() => {
+  function show(message, type='info'){
+    const container = document.getElementById('toastContainer');
+    const toast = document.createElement('div');
+    toast.className = `toast glass ${type}`;
+    const icon = type === 'success' ? '✅' : type === 'error' ? '⚠️' : 'ℹ️';
+    toast.innerHTML = `<span>${icon}</span><span>${Utils.escapeHtml(message)}</span>`;
+    container.appendChild(toast);
+    setTimeout(() => toast.remove(), 3100);
+  }
+  return { show };
+})();
+
+
+const ThemeManager = (() => {
+  function apply(themeName){
+    STATE.theme = themeName;
+    document.getElementById('htmlRoot').setAttribute('data-theme', themeName);
+    document.querySelectorAll('.theme-chip').forEach(chip => {
+      chip.classList.toggle('selected', chip.dataset.t === themeName);
+    });
+    const settings = StorageManager.load(CONFIG.storageKeys.settings, {});
+    settings.theme = themeName;
+    StorageManager.save(CONFIG.storageKeys.settings, settings);
+  }
+  function cycle(){
+    const idx = CONFIG.themes.indexOf(STATE.theme);
+    const next = CONFIG.themes[(idx + 1) % CONFIG.themes.length];
+    apply(next);
+    ToastManager.show(t('themeChangedMsg'), 'info');
+  }
+  return { apply, cycle };
+})();
+
+
+const UIRenderer = (() => {
+
+  function applyLanguage(lang){
+    STATE.lang = lang;
+    const html = document.getElementById('htmlRoot');
+    html.lang = lang;
+    html.dir = lang === 'ar' ? 'rtl' : 'ltr';
+    document.getElementById('langBtnLabel').textContent = lang === 'ar' ? 'EN' : 'AR';
+    document.querySelectorAll('[data-i18n]').forEach(el => {
+      const key = el.getAttribute('data-i18n');
+      el.textContent = t(key);
+    });
+    document.getElementById('settingsLangSelect').value = lang;
+    document.title = t('appTitle') + ' | ' + t('appSubtitle');
+    renderDecodeResult();
+    renderHistory();
+    renderDictionary();
+    const settings = StorageManager.load(CONFIG.storageKeys.settings, {});
+    settings.lang = lang; StorageManager.save(CONFIG.storageKeys.settings, settings);
+  }
+
+  function switchTab(tabName){
+    STATE.activeTab = tabName;
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.toggle('active', b.dataset.tab === tabName));
+    document.querySelectorAll('.tab-panel').forEach(p => p.classList.toggle('active', p.id === 'panel-' + tabName));
+    if(tabName === 'practice' && !STATE.practice.current) PracticeEngine.nextQuestion();
+  }
+
+  function buildPalette(){
+    const g1 = document.getElementById('paletteGrid1');
+    const g2 = document.getElementById('paletteGrid2');
+    const g3 = document.getElementById('paletteGrid3');
+    g1.innerHTML = ''; g2.innerHTML = ''; g3.innerHTML = '';
+    for(let i=0;i<26;i++){
+      const letter = String.fromCharCode(65+i);
+      const key = document.createElement('div');
+      key.className = 'pkey'; key.dataset.letter = letter;
+      key.innerHTML = CipherEngine.letterToSVG(letter) + `<span class="letter">${letter}</span>`;
+      key.addEventListener('click', (e) => { Utils.addRipple(e, key); Utils.playClick(); DecodeController.pushLetter(letter); });
+      if(i < 9) g1.appendChild(key);
+      else if(i < 18) g2.appendChild(key);
+      else g3.appendChild(key);
+    }
+  }
+
+  function renderDecodeBuffer(){
+    const out = document.getElementById('decodeOutput');
+    out.innerHTML = '';
+    if(STATE.decodeBuffer.length === 0){
+      out.innerHTML = `<span class="placeholder">${t('clickSymbolsHint')}</span>`;
+      return;
+    }
+    const frag = document.createDocumentFragment();
+    STATE.decodeBuffer.forEach(item => {
+      const tile = document.createElement('span');
+      if(item.type === 'letter'){ tile.className = 'symbol-tile'; tile.innerHTML = CipherEngine.letterToSVG(item.char); }
+      else if(item.type === 'space'){ tile.className = 'symbol-tile space'; }
+      else { tile.className = 'symbol-tile punct'; tile.textContent = item.char; }
+      frag.appendChild(tile);
+    });
+    out.appendChild(frag);
+  }
+
+  function renderDecodeResult(){
+    const enBox = document.getElementById('decodeEnResult');
+    const arBox = document.getElementById('decodeArResult');
+    const enWrap = enBox.closest('div').previousElementSibling; // not used but keep structure
+    const englishText = CipherEngine.bufferToEnglish(STATE.decodeBuffer);
+    const mode = STATE.decodeResultLangMode;
+
+    if(!englishText.trim()){
+      enBox.innerHTML = `<span class="placeholder">${t('resultPlaceholder')}</span>`;
+      arBox.innerHTML = `<span class="placeholder">${t('resultPlaceholder')}</span>`;
+    } else {
+      enBox.textContent = englishText;
+      if(STATE.settings.autoTranslate){
+        const translation = TranslationEngine.translateSentence(englishText);
+        arBox.textContent = translation.found ? translation.text : t('noTranslation') + ' — No Translation';
+      } else {
+        arBox.innerHTML = `<span class="placeholder">${t('resultPlaceholder')}</span>`;
+      }
+    }
+    document.getElementById('decodeEnResult').parentElement.querySelectorAll('label')[0];
+    const enLabel = document.querySelectorAll('#panel-decode label.field-label')[1];
+    const arLabel = document.querySelectorAll('#panel-decode label.field-label')[2];
+    enBox.style.display = (mode === 'ar') ? 'none' : 'block';
+    if(enLabel) enLabel.style.display = (mode === 'ar') ? 'none' : 'block';
+    arBox.style.display = (mode === 'en') ? 'none' : 'block';
+    if(arLabel) arLabel.style.display = (mode === 'en') ? 'none' : 'block';
+
+    updateStatsFromBuffer();
+  }
+
+  function updateStatsFromBuffer(){
+    const symbols = STATE.decodeBuffer.filter(i => i.type === 'letter').length;
+    const englishText = CipherEngine.bufferToEnglish(STATE.decodeBuffer);
+    const words = englishText.trim() ? englishText.trim().split(/\s+/).length : 0;
+  }
+
+  function renderEncodeOutput(text){
+    const out = document.getElementById('encodeOutput');
+    out.innerHTML = '';
+    if(!text.trim()){
+      out.innerHTML = `<span class="placeholder">${t('typeHint')}</span>`;
+      return;
+    }
+    const items = CipherEngine.encodeText(text);
+    const frag = document.createDocumentFragment();
+    items.forEach(item => {
+      const tile = document.createElement('span');
+      if(item.type === 'letter'){ tile.className = 'symbol-tile'; tile.innerHTML = item.svg; }
+      else if(item.type === 'space'){ tile.className = 'symbol-tile space'; }
+      else if(item.type === 'newline'){ tile.className = 'symbol-tile space'; }
+      else { tile.className = 'symbol-tile punct'; tile.textContent = item.char; }
+      frag.appendChild(tile);
+    });
+    out.appendChild(frag);
+  }
+
+  function renderDictionary(filter='', favOnly=false){
+    const list = document.getElementById('dictList');
+    list.innerHTML = '';
+    const words = Object.keys(DICTIONARY).filter(w => w.indexOf('_') === -1);
+    const q = filter.trim().toLowerCase();
+    let shown = words.filter(w => (!q || w.includes(q) || DICTIONARY[w].includes(q)));
+    if(favOnly) shown = shown.filter(w => STATE.favorites.includes(w));
+    if(shown.length === 0){ list.innerHTML = `<div class="empty-state">${t('dictEmptyMsg')}</div>`; return; }
+    const frag = document.createDocumentFragment();
+    shown.sort().forEach(w => {
+      const row = document.createElement('div'); row.className = 'dict-row';
+      const isFav = STATE.favorites.includes(w);
+      row.innerHTML = `
+        <div><span class="dict-word">${Utils.escapeHtml(w)}</span> — <span class="dict-ar">${Utils.escapeHtml(DICTIONARY[w])}</span></div>
+        <span class="dict-star ${isFav?'active':''}" data-word="${Utils.escapeHtml(w)}">★</span>`;
+      frag.appendChild(row);
+    });
+    list.appendChild(frag);
+  }
+
+  function renderHistory(){
+    const list = document.getElementById('historyList');
+    list.innerHTML = '';
+    if(STATE.history.length === 0){ list.innerHTML = `<div class="empty-state">${t('historyEmptyMsg')}</div>`; return; }
+    const frag = document.createDocumentFragment();
+    STATE.history.forEach(h => {
+      const item = document.createElement('div'); item.className = 'history-item';
+      const date = new Date(h.ts);
+      item.innerHTML = `
+        <div>
+          <span class="badge ${h.type==='encode'?'enc':'dec'}">${h.type==='encode' ? t('tabEncode') : t('tabDecode')}</span>
+          <div class="history-text">${Utils.escapeHtml(h.text)}</div>
+          <div class="history-meta">${date.toLocaleString()}</div>
+        </div>
+        <div class="history-actions">
+          <button class="btn ghost sm" data-hcopy="${h.id}">📋</button>
+          <button class="btn danger sm" data-hdel="${h.id}">✕</button>
+        </div>`;
+      frag.appendChild(item);
+    });
+    list.appendChild(frag);
+  }
+
+  function renderStats(){
+    document.getElementById('statSymbols').textContent = STATE.stats.symbols;
+    document.getElementById('statLetters').textContent = STATE.stats.letters;
+    document.getElementById('statWords').textContent = STATE.stats.words;
+    document.getElementById('statCopies').textContent = STATE.stats.copies;
+    document.getElementById('statEncodes').textContent = STATE.stats.encodes;
+    document.getElementById('statDecodes').textContent = STATE.stats.decodes;
+  }
+
+  return {
+    applyLanguage, switchTab, buildPalette, renderDecodeBuffer, renderDecodeResult,
+    renderEncodeOutput, renderDictionary, renderHistory, renderStats
+  };
+})();
+
+
+const StatsManager = (() => {
+  function record({symbols=0, letters=0, words=0, copies=0, encodes=0, decodes=0}){
+    STATE.stats.symbols += symbols; STATE.stats.letters += letters; STATE.stats.words += words;
+    STATE.stats.copies += copies; STATE.stats.encodes += encodes; STATE.stats.decodes += decodes;
+    StorageManager.save(CONFIG.storageKeys.stats, STATE.stats);
+    UIRenderer.renderStats();
+  }
+  return { record };
+})();
+
+const DecodeController = (() => {
+  function pushLetter(letter){
+    STATE.decodeBuffer.push({type:'letter', char: letter});
+    UIRenderer.renderDecodeBuffer();
+    UIRenderer.renderDecodeResult();
+    StatsManager.record({symbols:1, letters:1});
+  }
+  function pushSpace(){
+    STATE.decodeBuffer.push({type:'space', char:' '});
+    UIRenderer.renderDecodeBuffer(); UIRenderer.renderDecodeResult();
+  }
+  function backspace(){
+    STATE.decodeBuffer.pop();
+    UIRenderer.renderDecodeBuffer(); UIRenderer.renderDecodeResult();
+  }
+  function clear(){
+    STATE.decodeBuffer = [];
+    UIRenderer.renderDecodeBuffer(); UIRenderer.renderDecodeResult();
+    ToastManager.show(t('clearedMsg'), 'info');
+  }
+  function commitToHistory(){
+    const text = CipherEngine.bufferToEnglish(STATE.decodeBuffer);
+    if(!text.trim()) return;
+    HistoryManager.add({ type:'decode', text });
+    StatsManager.record({decodes:1, words: text.trim().split(/\s+/).length});
+  }
+  return { pushLetter, pushSpace, backspace, clear, commitToHistory };
+})();
+
+
+const PracticeEngine = (() => {
+  function nextQuestion(){
+    const idx = Math.floor(Math.random() * 26);
+    const letter = String.fromCharCode(65 + idx);
+    STATE.practice.current = letter;
+    document.getElementById('practiceSymbol').innerHTML = CipherEngine.letterToSVG(letter);
+    const options = new Set([letter]);
+    while(options.size < 4){ options.add(String.fromCharCode(65 + Math.floor(Math.random()*26))); }
+    const arr = Array.from(options).sort(() => Math.random() - .5);
+    const optionsBox = document.getElementById('practiceOptions');
+    optionsBox.innerHTML = '';
+    arr.forEach(opt => {
+      const btn = document.createElement('button');
+      btn.className = 'opt-btn'; btn.textContent = opt;
+      btn.addEventListener('click', () => checkAnswer(opt, btn));
+      optionsBox.appendChild(btn);
+    });
+  }
+  function checkAnswer(choice, btnEl){
+    STATE.practice.total++;
+    if(choice === STATE.practice.current){
+      STATE.practice.score++;
+      btnEl.classList.add('correct');
+      ToastManager.show(t('correctMsg'), 'success');
+    } else {
+      btnEl.classList.add('wrong');
+      ToastManager.show(t('wrongMsg'), 'error');
+    }
+    document.getElementById('practiceScore').textContent = STATE.practice.score;
+    document.getElementById('practiceTotal').textContent = STATE.practice.total;
+    document.querySelectorAll('#practiceOptions .opt-btn').forEach(b => b.disabled = true);
+    setTimeout(nextQuestion, 850);
+  }
+  return { nextQuestion };
+})();
+
+function loadPersistedState(){
+  STATE.history = StorageManager.load(CONFIG.storageKeys.history, []);
+  STATE.favorites = StorageManager.load(CONFIG.storageKeys.favorites, []);
+  STATE.stats = StorageManager.load(CONFIG.storageKeys.stats, STATE.stats);
+  const settings = StorageManager.load(CONFIG.storageKeys.settings, {});
+  if(settings.lang) STATE.lang = settings.lang;
+  if(settings.theme) STATE.theme = settings.theme;
+  if(settings.autoTranslate !== undefined) STATE.settings.autoTranslate = settings.autoTranslate;
+  if(settings.autoCopy !== undefined) STATE.settings.autoCopy = settings.autoCopy;
+  if(settings.sound !== undefined) STATE.settings.sound = settings.sound;
+  if(settings.autosave !== undefined) STATE.settings.autosave = settings.autosave;
+  if(!localStorage.getItem('pigpen_welcome_shown')) {
+    setTimeout(() => document.getElementById('welcomeModal').classList.add('show'), 400);
+    localStorage.setItem('pigpen_welcome_shown', '1');
+  }
+}
+
+function renderCreditsEverywhere(){
+  const links = [
+    document.getElementById('footerCreditLink'),
+    document.getElementById('welcomeCreditLink'),
+    document.getElementById('aboutCreditLink'),
+    document.getElementById('settingsCreditLink')
+  ];
+  links.forEach(a => { a.textContent = CONFIG.credits.ownerName; a.href = CONFIG.credits.ownerUrl; });
+  document.getElementById('footerYear').textContent = CONFIG.year;
+  document.getElementById('settingsVersion').textContent = 'v' + CONFIG.version;
+}
+
+function wireEvents(){
+  // TABS
+  document.getElementById('tabsNav').addEventListener('click', (e) => {
+    const btn = e.target.closest('.tab-btn'); if(!btn) return;
+    Utils.addRipple(e, btn); UIRenderer.switchTab(btn.dataset.tab);
+  });
+
+  document.getElementById('langToggleBtn').addEventListener('click', () => {
+    UIRenderer.applyLanguage(STATE.lang === 'ar' ? 'en' : 'ar');
+  });
+  document.getElementById('settingsLangSelect').addEventListener('change', (e) => UIRenderer.applyLanguage(e.target.value));
+
+  document.getElementById('themeCycleBtn').addEventListener('click', ThemeManager.cycle);
+  document.querySelectorAll('.theme-chip').forEach(chip => {
+    chip.addEventListener('click', () => { ThemeManager.apply(chip.dataset.t); ToastManager.show(t('themeChangedMsg'), 'success'); });
+  });
+
+  document.getElementById('aboutBtn').addEventListener('click', () => document.getElementById('aboutModal').classList.add('show'));
+  document.getElementById('aboutCloseBtn').addEventListener('click', () => document.getElementById('aboutModal').classList.remove('show'));
+  document.getElementById('welcomeCloseBtn').addEventListener('click', () => document.getElementById('welcomeModal').classList.remove('show'));
+  document.querySelectorAll('.modal-overlay').forEach(m => m.addEventListener('click', (e) => { if(e.target === m) m.classList.remove('show'); }));
+
+  document.getElementById('decodeSpaceBtn').addEventListener('click', DecodeController.pushSpace);
+  document.getElementById('decodeBackspaceBtn').addEventListener('click', DecodeController.backspace);
+  document.getElementById('decodeClearBtn').addEventListener('click', DecodeController.clear);
+  document.getElementById('decodeLangOptions').addEventListener('click', (e) => {
+    const chip = e.target.closest('.chip-toggle'); if(!chip) return;
+    document.querySelectorAll('#decodeLangOptions .chip-toggle').forEach(c => c.classList.remove('active'));
+    chip.classList.add('active');
+    STATE.decodeResultLangMode = chip.dataset.lang;
+    UIRenderer.renderDecodeResult();
+  });
+
+  document.body.addEventListener('click', (e) => {
+    const copyBtn = e.target.closest('[data-copy]');
+    if(!copyBtn) return;
+    const kind = copyBtn.dataset.copy;
+    let text = '';
+    if(kind === 'decodeEn') text = document.getElementById('decodeEnResult').textContent;
+    if(kind === 'decodeAr') text = document.getElementById('decodeArResult').textContent;
+    if(kind === 'decodeAll') text = document.getElementById('decodeEnResult').textContent + '\n' + document.getElementById('decodeArResult').textContent;
+    if(kind === 'encodeAll') text = CipherEngine.bufferToEnglish(CipherEngine.encodeText(document.getElementById('encodeInput').value).map(i=>({type:i.type,char:i.char})));
+    Utils.copyText(text).then(() => { ToastManager.show(t('copiedMsg'), 'success'); StatsManager.record({copies:1}); })
+      .catch(() => ToastManager.show(t('importErrorMsg'), 'error'));
+  });
+
+  const encodeInput = document.getElementById('encodeInput');
+  const debouncedEncode = Utils.debounce((val) => {
+    UIRenderer.renderEncodeOutput(val);
+    if(val.trim()){
+      HistoryManager.add({type:'encode', text: val});
+      StatsManager.record({encodes:1, symbols: val.replace(/[^a-zA-Z]/g,'').length, letters: val.replace(/[^a-zA-Z]/g,'').length, words: val.trim().split(/\s+/).length});
+    }
+  }, 600);
+  encodeInput.addEventListener('input', (e) => { UIRenderer.renderEncodeOutput(e.target.value); debouncedEncode(e.target.value); });
+  document.getElementById('encodeClearBtn').addEventListener('click', () => { encodeInput.value=''; UIRenderer.renderEncodeOutput(''); });
+
+  document.getElementById('encodeImportBtn').addEventListener('click', () => document.getElementById('encodeImportInput').click());
+  document.getElementById('encodeImportInput').addEventListener('change', (e) => {
+    const file = e.target.files[0]; if(!file) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      try{
+        let content = reader.result;
+        if(file.name.endsWith('.json')){ const parsed = JSON.parse(content); content = parsed.text || JSON.stringify(parsed); }
+        encodeInput.value = content;
+        UIRenderer.renderEncodeOutput(content);
+        ToastManager.show(t('importedMsg'), 'success');
+      }catch(err){ ToastManager.show(t('importErrorMsg'), 'error'); }
+    };
+    reader.readAsText(file);
+  });
+
+  document.getElementById('exportTxtBtn').addEventListener('click', () => {
+    Utils.downloadBlob(encodeInput.value, 'pigpen-export.txt', 'text/plain');
+    ToastManager.show(t('exportedMsg'), 'success');
+  });
+  document.getElementById('exportJsonBtn').addEventListener('click', () => {
+    Utils.downloadBlob(JSON.stringify({text: encodeInput.value, exportedAt: new Date().toISOString()}, null, 2), 'pigpen-export.json', 'application/json');
+    ToastManager.show(t('exportedMsg'), 'success');
+  });
+  document.getElementById('exportCsvBtn').addEventListener('click', () => {
+    const rows = [['char','type']];
+    CipherEngine.encodeText(encodeInput.value).forEach(i => rows.push([i.char.replace(/"/g,'""'), i.type]));
+    const csv = rows.map(r => r.map(v => `"${v}"`).join(',')).join('\n');
+    Utils.downloadBlob(csv, 'pigpen-export.csv', 'text/csv');
+    ToastManager.show(t('exportedMsg'), 'success');
+  });
+
+  document.getElementById('dictSearchInput').addEventListener('input', Utils.debounce((e) => {
+    const favOnly = document.querySelector('#panel-dictionary .chip-toggle.active').dataset.filter === 'fav';
+    UIRenderer.renderDictionary(e.target.value, favOnly);
+  }, 150));
+  document.querySelectorAll('#panel-dictionary .chip-toggle').forEach(chip => {
+    chip.addEventListener('click', () => {
+      document.querySelectorAll('#panel-dictionary .chip-toggle').forEach(c => c.classList.remove('active'));
+      chip.classList.add('active');
+      UIRenderer.renderDictionary(document.getElementById('dictSearchInput').value, chip.dataset.filter === 'fav');
+    });
+  });
+  document.getElementById('dictList').addEventListener('click', (e) => {
+    const star = e.target.closest('.dict-star'); if(!star) return;
+    const word = star.dataset.word;
+    if(STATE.favorites.includes(word)) STATE.favorites = STATE.favorites.filter(w => w !== word);
+    else STATE.favorites.push(word);
+    StorageManager.save(CONFIG.storageKeys.favorites, STATE.favorites);
+    const favOnly = document.querySelector('#panel-dictionary .chip-toggle.active').dataset.filter === 'fav';
+    UIRenderer.renderDictionary(document.getElementById('dictSearchInput').value, favOnly);
+  });
+
+  document.getElementById('clearHistoryBtn').addEventListener('click', () => { HistoryManager.clear(); ToastManager.show(t('historyClearedMsg'), 'info'); });
+  document.getElementById('historyList').addEventListener('click', (e) => {
+    const del = e.target.closest('[data-hdel]');
+    const copy = e.target.closest('[data-hcopy]');
+    if(del){ HistoryManager.remove(del.dataset.hdel); }
+    if(copy){
+      const entry = STATE.history.find(h => h.id === copy.dataset.hcopy);
+      if(entry) Utils.copyText(entry.text).then(() => { ToastManager.show(t('copiedMsg'), 'success'); StatsManager.record({copies:1}); });
+    }
+  });
+
+  document.getElementById('practiceNextBtn').addEventListener('click', PracticeEngine.nextQuestion);
+
+  const bindToggle = (id, key) => {
+    const el = document.getElementById(id);
+    el.checked = STATE.settings[key];
+    el.addEventListener('change', () => {
+      STATE.settings[key] = el.checked;
+      const settings = StorageManager.load(CONFIG.storageKeys.settings, {});
+      settings[key] = el.checked; StorageManager.save(CONFIG.storageKeys.settings, settings);
+      if(key === 'autoTranslate') UIRenderer.renderDecodeResult();
+    });
+  };
+  bindToggle('settingAutoTranslate','autoTranslate');
+  bindToggle('settingAutoCopy','autoCopy');
+  bindToggle('settingSound','sound');
+  bindToggle('settingAutosave','autosave');
+
+  document.addEventListener('keydown', (e) => {
+    if(STATE.activeTab !== 'decode') return;
+    if(document.activeElement && ['TEXTAREA','INPUT'].includes(document.activeElement.tagName)) return;
+    if(e.key === 'Backspace'){ e.preventDefault(); DecodeController.backspace(); }
+    else if(e.key === ' '){ e.preventDefault(); DecodeController.pushSpace(); }
+    else if(/^[a-zA-Z]$/.test(e.key)){ DecodeController.pushLetter(e.key.toUpperCase()); }
+  });
+
+  const debouncedDecodeCommit = Utils.debounce(() => DecodeController.commitToHistory(), 1500);
+  document.getElementById('paletteGrid1').addEventListener('click', debouncedDecodeCommit);
+  document.getElementById('paletteGrid2').addEventListener('click', debouncedDecodeCommit);
+  document.getElementById('paletteGrid3').addEventListener('click', debouncedDecodeCommit);
+}
+
+function init(){
+  loadPersistedState();
+  ThemeManager.apply(STATE.theme);
+  UIRenderer.applyLanguage(STATE.lang);
+  UIRenderer.buildPalette();
+  UIRenderer.renderDecodeBuffer();
+  UIRenderer.renderDecodeResult();
+  UIRenderer.renderEncodeOutput('');
+  UIRenderer.renderDictionary();
+  UIRenderer.renderHistory();
+  UIRenderer.renderStats();
+  renderCreditsEverywhere();
+  wireEvents();
+}
+
+document.addEventListener('DOMContentLoaded', init);
+</script>
+</body>
+</html>
