@@ -38,7 +38,7 @@ No installation, no build step, no server required:
 
 ```bash
 # Just open the file directly
-open pigpen-cipher-toolkit.html
+open index.html
 ```
 
 ---
